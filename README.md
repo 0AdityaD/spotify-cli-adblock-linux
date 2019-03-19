@@ -45,6 +45,8 @@ use one of the following parameters:
 --prev            plays the previous song
 --volumeup        increases sound volume
 --volumedown      decreases sound volume
+--mute            mute the sound
+--unmute          unmute the sound
 ```
 
 if you don't use any parameters, you'll enter the shell mode, when you'll be able to use all commands above
