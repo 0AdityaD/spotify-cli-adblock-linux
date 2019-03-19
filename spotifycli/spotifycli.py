@@ -124,14 +124,16 @@ def get_song():
 def show_status():
     artist, title = get_song()
     if 'Advertisement' in title and "" == artist:
-        return 'Ad'
+        print('Ad')
+        return
     print("%s - %s" % (artist, title))
 
 
 def show_status_short():
     artist, title = get_song()
     if 'Advertisement' in title and "" == artist:
-        return 'Ad'
+        print('Ad')
+        return
     artist = artist[:15] + (artist[15:] and '...')
     title = title[:10] + (title[10:] and '...')
     print("%s - %s" % (artist, title))

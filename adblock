@@ -1,0 +1,19 @@
+#! /bin/bash
+
+doIt () {
+    while [ 1 ]
+    do
+        if [ "$(spotifycli --playbackstatus)" == "$(echo Playing)" ];
+        then
+            if [ "$(spotifycli --status)" == "$(echo Ad)" ];
+            then
+                spotifycli --mute
+            else
+                spotifycli --unmute
+            fi
+        fi
+        sleep 1
+    done
+}
+
+doIt &>/dev/null &
