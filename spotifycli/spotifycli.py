@@ -6,7 +6,6 @@ import sys
 import os
 import argparse
 import dbus
-import lyricwikia
 from subprocess import Popen, PIPE
 
 if sys.version_info > (3, 6):
@@ -39,8 +38,6 @@ def main():
         show_album()
     elif args.playbackstatus:
         show_playback_status()
-    elif args.lyrics:
-        show_lyrics()
     elif args.play:
         perform_spotify_action("Play")
     elif args.pause:
@@ -55,6 +52,10 @@ def main():
         control_volume("+5%")
     elif args.volumedown:
         control_volume("-5%")
+    elif args.mute:
+        mute()
+    elif args.unmute:
+        unmute()
 
 
 def start_shell():
@@ -100,11 +101,12 @@ def get_arguments():
         ("--play", "plays the song"),
         ("--pause", "pauses the song"),
         ("--playpause", "plays or pauses the song (toggles a state)"),
-        ("--lyrics", "shows the lyrics for the song"),
         ("--next", "plays the next song"),
         ("--prev", "plays the previous song"),
         ("--volumeup", "increases the sound volume"),
-        ("--volumedown", "decreases the sound volume")
+        ("--volumedown", "decreases the sound volume"),
+        ("--mute", "mutes all sound"),
+        ("--unmute", "unmutes all sound")
     ]
 
 
@@ -121,11 +123,15 @@ def get_song():
 
 def show_status():
     artist, title = get_song()
+    if 'Advertisement' in title and "" == artist:
+        return 'Ad'
     print("%s - %s" % (artist, title))
 
 
 def show_status_short():
     artist, title = get_song()
+    if 'Advertisement' in title and "" == artist:
+        return 'Ad'
     artist = artist[:15] + (artist[15:] and '...')
     title = title[:10] + (title[10:] and '...')
     print("%s - %s" % (artist, title))
@@ -142,16 +148,6 @@ def show_song_short():
     print("%s" % title)
 
 
-def show_lyrics():
-    try:
-        artist, title = get_song()
-        lyrics = lyricwikia.get_all_lyrics(artist, title)
-        lyrics = ''.join(lyrics[0]).encode('utf-8')
-        print(lyrics)
-    except BaseException:
-        print('lyrics not found')
-
-
 def show_artist():
     artist, _ = get_song()
     print("%s" % artist)
@@ -165,9 +161,9 @@ def show_artist_short():
 
 def show_playback_status():
     playback_status = get_spotify_property("PlaybackStatus")
-    print({"Playing": '▶',
-           "Paused": '▮▮',
-           "Stopped": '■'
+    print({"Playing": 'Playing',
+           "Paused": 'Paused',
+           "Stopped": 'Stopped'
            }[playback_status])
 
 
@@ -205,6 +201,18 @@ def control_volume(volume_percent):
         volume_percent,
         shell=True,
         stdout=PIPE)
+
+
+def muter(action):
+    Popen('pactl set-sink-mute 0 %d' % action, shell=True, stdout=PIPE)
+
+
+def mute():
+    muter(1)
+
+
+def unmute():
+    muter(0)
 
 
 if __name__ == "__main__":
