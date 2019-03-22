@@ -5,7 +5,7 @@ doIt () {
     do
         if [ "$(spotifycli --playbackstatus)" == "$(echo Playing)" ];
         then
-            if [ "$(spotifycli --status)" == "$(echo Ad)" ];
+            if [ "$(spotifycli --artist)" == "$(echo)" ];
             then
                 spotifycli --mute
             else
