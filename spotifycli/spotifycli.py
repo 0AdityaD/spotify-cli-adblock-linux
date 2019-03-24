@@ -6,7 +6,8 @@ import sys
 import os
 import argparse
 import dbus
-from subprocess import Popen, PIPE
+import re
+from subprocess import Popen, PIPE, STDOUT, check_output
 
 if sys.version_info > (3, 6):
     from .version import __version__
@@ -191,16 +192,32 @@ def perform_spotify_action(spotify_command):
           spotify_command, shell=True, stdout=PIPE)
 
 
+def getSinks():
+    output = check_output('pactl list sinks',
+                          shell=True,
+                          stderr=STDOUT,
+                          universal_newlines=True)
+    res = list(filter(lambda x: 'Sink #' in x,
+                      re.split('\n', str(output).replace('\\n\\n', '\n'))))
+    res = list(map(lambda x: int(x.strip('Sink #')), res))
+    return res
+
+
 def control_volume(volume_percent):
-    Popen(
-        'pactl set-sink-volume 0 "%s"' %
-        volume_percent,
-        shell=True,
-        stdout=PIPE)
+    sinks = getSinks()
+    for sink in sinks:
+        Popen(
+            'pactl set-sink-volume %d "%s"' %
+            (sink, volume_percent),
+            shell=True,
+            stdout=PIPE)
 
 
 def muter(action):
-    Popen('pactl set-sink-mute 0 %d' % action, shell=True, stdout=PIPE)
+    sinks = getSinks()
+    for sink in sinks:
+        Popen('pactl set-sink-mute %d %d' %
+              (sink, action), shell=True, stdout=PIPE)
 
 
 def mute():
